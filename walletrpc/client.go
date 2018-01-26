@@ -10,9 +10,9 @@ import (
 
 // Client is a monero-wallet-rpc client.
 type Client interface {
-	// Getbalance - Return the wallet's balance.
+	// Return the wallet's balance.
 	Getbalance() (balance, unlockedBalance uint64, err error)
-	// Getaddress - Return the wallet's address.
+	// Return the wallet's address.
 	// address - string; The 95-character hex address string of the monero-wallet-rpc in session.
 	Getaddress() (address string, err error)
 	// Getheight - Returns the wallet's current block height.
@@ -21,6 +21,31 @@ type Client interface {
 	Getheight() (height uint, err error)
 	// Transfer - Send monero to a number of recipients.
 	Transfer(req TransferRequest) (resp *TransferResponse, err error)
+	// Same as transfer, but can split into more than one tx if necessary.
+	TransferSplit(req TransferRequest) (resp *TransferSplitResponse, err error)
+	// Send all dust outputs back to the wallet's, to make them easier to spend (and mix).
+	SweepDust() (txHashList []string, err error)
+	// Send all unlocked balance to an address.
+	SweepAll(req SweepAllRequest) (resp *SweepAllResponse, err error)
+	// Save the blockchain.
+	Store() error
+	// Get a list of incoming payments using a given payment id.
+	GetPayments(paymentid string) (payments []Payment, err error)
+	// Get a list of incoming payments using a given payment id, or a list of
+	// payments ids, from a given height. This method is the preferred method
+	// over get_payments because it has the same functionality but is more extendable.
+	// Either is fine for looking up transactions by a single payment ID.
+	// Inputs:
+	//
+	//	payment_ids - array of: string
+	//	min_block_height - unsigned int; The block height at which to start looking for payments.
+	GetBulkPayments(paymentids []string, minblockheight uint) (payments []Payment, err error)
+	// Returns a list of transfers.
+	GetTransfers(req GetTransfersRequest) (resp *GetTransfersResponse, err error)
+	// Show information about a transfer to/from this address.
+	GetTransferByTxID(txid string) (transfer *Transfer, err error)
+	// Return a list of incoming transfers to the wallet.
+	IncomingTransfers(transfertype GetTransferType) (transfers []IncTransfer, err error)
 }
 
 // New returns a new monero-wallet-rpc client.
@@ -67,6 +92,14 @@ func (c *client) do(method string, in, out interface{}) error {
 		return fmt.Errorf("http status %v", resp.StatusCode)
 	}
 	defer resp.Body.Close()
+
+	// in theory this is only done to catch
+	// any monero related errors if
+	// we are not expecting any data back
+	if out == nil {
+		v := &json2.EmptyResponse{}
+		return json2.DecodeClientResponse(resp.Body, v)
+	}
 	return json2.DecodeClientResponse(resp.Body, out)
 }
 
@@ -108,4 +141,113 @@ func (c *client) Transfer(req TransferRequest) (resp *TransferResponse, err erro
 		return nil, err
 	}
 	return resp, nil
+}
+
+func (c *client) TransferSplit(req TransferRequest) (resp *TransferSplitResponse, err error) {
+	resp = &TransferSplitResponse{}
+	err = c.do("transfer_split", &req, resp)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+func (c *client) SweepDust() (txHashList []string, err error) {
+	jd := struct {
+		TxHashList []string `json:"tx_hash_list"`
+	}{}
+	err = c.do("sweep_dust", nil, &jd)
+	if err != nil {
+		return nil, err
+	}
+	return jd.TxHashList, nil
+}
+
+func (c *client) SweepAll(req SweepAllRequest) (resp *SweepAllResponse, err error) {
+	resp = &SweepAllResponse{}
+	err = c.do("sweep_all", &req, resp)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+func (c *client) Store() error {
+	return c.do("store", nil, nil)
+}
+
+func (c *client) GetPayments(paymentid string) (payments []Payment, err error) {
+	jin := struct {
+		PaymentID string `json:"payment_id"`
+	}{
+		paymentid,
+	}
+	jd := struct {
+		Payments []Payment `json:"payments"`
+	}{}
+	err = c.do("get_payments", &jin, &jd)
+	if err != nil {
+		return nil, err
+	}
+	return jd.Payments, nil
+}
+
+func (c *client) GetBulkPayments(paymentids []string, minblockheight uint) (payments []Payment, err error) {
+	jin := struct {
+		PaymentIDs     []string `json:"payment_ids"`
+		MinBlockHeight uint     `json:"min_block_height"`
+	}{
+		paymentids,
+		minblockheight,
+	}
+	jd := struct {
+		Payments []Payment `json:"payments"`
+	}{}
+	err = c.do("get_bulk_payments", &jin, &jd)
+	if err != nil {
+		return nil, err
+	}
+	return jd.Payments, nil
+}
+
+func (c *client) GetTransfers(req GetTransfersRequest) (resp *GetTransfersResponse, err error) {
+	resp = &GetTransfersResponse{}
+	err = c.do("get_transfers", &req, resp)
+	return
+}
+
+func (c *client) GetTransferByTxID(txid string) (transfer *Transfer, err error) {
+	jin := struct {
+		TxID string `json:"txid"`
+	}{
+		txid,
+	}
+	jd := struct {
+		Transfer *Transfer `json:"transfer"`
+	}{}
+	err = c.do("get_transfer_by_txid", &jin, &jd)
+	if err != nil {
+		return
+	}
+	transfer = jd.Transfer
+	return
+}
+
+// incoming_transfers
+
+func (c *client) IncomingTransfers(transfertype GetTransferType) (transfers []IncTransfer, err error) {
+	jin := struct {
+		TransferType GetTransferType `json:"transfer_type"`
+	}{
+		transfertype,
+	}
+	jd := struct {
+		Transfers []IncTransfer `json:"transfers"`
+	}{}
+	err = c.do("incoming_transfers", &jin, &jd)
+	if err != nil {
+		return
+	}
+	transfers = jd.Transfers
+	return
 }

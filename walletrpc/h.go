@@ -56,6 +56,32 @@ func GetWalletError(err error) (isWalletError bool, werr *WalletError) {
 	return
 }
 
+// Priority represents a transaction priority
+type Priority uint
+
+// Accepted Values are: 0-3 for: default, unimportant, normal, elevated, priority.
+const (
+	PriorityDefault     Priority = 0
+	PriorityUnimportant Priority = 1
+	PriorityNormal      Priority = 2
+	PriorityElevated    Priority = 3
+)
+
+// GetTransferType is a string that contains the possible types:
+// "all": all the transfers;
+// "available": only transfers which are not yet spent;
+// "unavailable": only transfers which are already spent.
+type GetTransferType string
+
+const (
+	// TransferAll - all the transfers
+	TransferAll GetTransferType = "all"
+	// TransferAvailable - only transfers which are not yet spent
+	TransferAvailable GetTransferType = "available"
+	// TransferUnavailable - only transfers which are already spent
+	TransferUnavailable GetTransferType = "unavailable"
+)
+
 // XMRToDecimal converts a raw atomic XMR balance to a more
 // human readable format.
 func XMRToDecimal(xmr uint64) string {
