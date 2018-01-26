@@ -67,6 +67,8 @@ type Client interface {
 	GetTxNotes(txids []string) (notes []string, err error)
 	// Sign a string.
 	Sign(data string) (signature string, err error)
+	// Verify a signature on a string.
+	Verify(data, address, signature string) (good bool, err error)
 }
 
 // New returns a new monero-wallet-rpc client.
@@ -400,5 +402,26 @@ func (c *client) Sign(data string) (signature string, err error) {
 		return "", err
 	}
 	signature = jd.Signature
+	return
+}
+
+func (c *client) Verify(data, address, signature string) (good bool, err error) {
+	jin := struct {
+		Data      string `json:"data"`
+		Address   string `json:"address"`
+		Signature string `json:"signature"`
+	}{
+		data,
+		address,
+		signature,
+	}
+	jd := struct {
+		Good bool `json:"good"`
+	}{}
+	err = c.do("verify", &jin, &jd)
+	if err != nil {
+		return false, err
+	}
+	good = jd.Good
 	return
 }
