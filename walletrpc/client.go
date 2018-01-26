@@ -55,6 +55,10 @@ type Client interface {
 	SplitIntegratedAddress(integratedaddr string) (paymentid, address string, err error)
 	// Stops the wallet, storing the current state.
 	StopWallet() error
+	// Create a payment URI using the official URI spec.
+	MakeURI(req URIDef) (uri string, err error)
+	// Parse a payment URI to get payment information.
+	ParseURI(uri string) (parsed *URIDef, err error)
 }
 
 // New returns a new monero-wallet-rpc client.
@@ -314,4 +318,30 @@ func (c *client) SplitIntegratedAddress(integratedaddr string) (paymentid, addre
 
 func (c *client) StopWallet() error {
 	return c.do("stop_wallet", nil, nil)
+}
+
+func (c *client) MakeURI(req URIDef) (uri string, err error) {
+	jd := struct {
+		URI string `json:"uri"`
+	}{}
+	err = c.do("make_uri", &req, &jd)
+	if err != nil {
+		return
+	}
+	uri = jd.URI
+	return
+}
+
+func (c *client) ParseURI(uri string) (parsed *URIDef, err error) {
+	jin := struct {
+		URI string `json:"uri"`
+	}{
+		uri,
+	}
+	parsed = &URIDef{}
+	err = c.do("parse_uri", &jin, parsed)
+	if err != nil {
+		return nil, err
+	}
+	return
 }

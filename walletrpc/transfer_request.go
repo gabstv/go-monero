@@ -143,3 +143,17 @@ type IncTransfer struct {
 	TxHash string `json:"tx_hash"`
 	TxSize uint64 `json:"tx_size"`
 }
+
+// URIDef is the skeleton of the MakeURI()
+type URIDef struct {
+	// address - wallet address string
+	Address string `json:"address"`
+	// amount (optional) - the integer amount to receive, in atomic units
+	Amount uint64 `json:"amount,omitempty"`
+	// payment_id (optional) - 16 or 64 character hexadecimal payment id string
+	PaymentID string `json:"payment_id,omitempty"`
+	// recipient_name (optional) - string name of the payment recipient
+	RecipientName string `json:"recipient_name,omitempty"`
+	// tx_description (optional) - string describing the reason for the tx
+	TxDescription string `json:"tx_description,omitempty"`
+}
