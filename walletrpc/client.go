@@ -51,6 +51,8 @@ type Client interface {
 	// Make an integrated address from the wallet address and a payment id.
 	// payment_id - string; hex encoded; can be empty, in which case a random payment id is generated
 	MakeIntegratedAddress(paymentid string) (integratedaddr string, err error)
+	// Retrieve the standard address and payment id corresponding to an integrated address.
+	SplitIntegratedAddress(integratedaddr string) (paymentid, address string, err error)
 }
 
 // New returns a new monero-wallet-rpc client.
@@ -286,5 +288,24 @@ func (c *client) MakeIntegratedAddress(paymentid string) (integratedaddr string,
 		return
 	}
 	integratedaddr = jd.Address
+	return
+}
+
+func (c *client) SplitIntegratedAddress(integratedaddr string) (paymentid, address string, err error) {
+	jin := struct {
+		IntegratedAddress string `json:"integrated_address"`
+	}{
+		integratedaddr,
+	}
+	jd := struct {
+		Address   string `json:"standard_address"`
+		PaymentID string `json:"payment_id"`
+	}{}
+	err = c.do("split_integrated_address", &jin, &jd)
+	if err != nil {
+		return
+	}
+	paymentid = jd.PaymentID
+	address = jd.Address
 	return
 }
