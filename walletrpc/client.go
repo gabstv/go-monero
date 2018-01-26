@@ -61,6 +61,12 @@ type Client interface {
 	ParseURI(uri string) (parsed *URIDef, err error)
 	// Rescan blockchain from scratch.
 	RescanBlockchain() error
+	// Set arbitrary string notes for transactions.
+	SetTxNotes(txids, notes []string) error
+	// Get string notes for transactions.
+	GetTxNotes(txids []string) (notes []string, err error)
+	// Sign a string.
+	Sign(data string) (signature string, err error)
 }
 
 // New returns a new monero-wallet-rpc client.
@@ -350,4 +356,49 @@ func (c *client) ParseURI(uri string) (parsed *URIDef, err error) {
 
 func (c *client) RescanBlockchain() error {
 	return c.do("rescan_blockchain", nil, nil)
+}
+
+func (c *client) SetTxNotes(txids, notes []string) error {
+	jin := struct {
+		TxIDs []string `json:"txids"`
+		Notes []string `json:"notes"`
+	}{
+		txids,
+		notes,
+	}
+	return c.do("set_tx_notes", &jin, nil)
+}
+
+func (c *client) GetTxNotes(txids []string) (notes []string, err error) {
+	jin := struct {
+		TxIDs []string `json:"txids"`
+	}{
+		txids,
+	}
+	jd := struct {
+		Notes []string `json:"notes"`
+	}{}
+	err = c.do("get_tx_notes", &jin, &jd)
+	if err != nil {
+		return nil, err
+	}
+	notes = jd.Notes
+	return
+}
+
+func (c *client) Sign(data string) (signature string, err error) {
+	jin := struct {
+		Data string `json:"data"`
+	}{
+		data,
+	}
+	jd := struct {
+		Signature string `json:"signature"`
+	}{}
+	err = c.do("sign", &jin, &jd)
+	if err != nil {
+		return "", err
+	}
+	signature = jd.Signature
+	return
 }
