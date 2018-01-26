@@ -59,6 +59,8 @@ type Client interface {
 	MakeURI(req URIDef) (uri string, err error)
 	// Parse a payment URI to get payment information.
 	ParseURI(uri string) (parsed *URIDef, err error)
+	// Rescan blockchain from scratch.
+	RescanBlockchain() error
 }
 
 // New returns a new monero-wallet-rpc client.
@@ -344,4 +346,8 @@ func (c *client) ParseURI(uri string) (parsed *URIDef, err error) {
 		return nil, err
 	}
 	return
+}
+
+func (c *client) RescanBlockchain() error {
+	return c.do("rescan_blockchain", nil, nil)
 }
