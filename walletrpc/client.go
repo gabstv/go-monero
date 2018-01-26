@@ -53,6 +53,8 @@ type Client interface {
 	MakeIntegratedAddress(paymentid string) (integratedaddr string, err error)
 	// Retrieve the standard address and payment id corresponding to an integrated address.
 	SplitIntegratedAddress(integratedaddr string) (paymentid, address string, err error)
+	// Stops the wallet, storing the current state.
+	StopWallet() error
 }
 
 // New returns a new monero-wallet-rpc client.
@@ -308,4 +310,8 @@ func (c *client) SplitIntegratedAddress(integratedaddr string) (paymentid, addre
 	paymentid = jd.PaymentID
 	address = jd.Address
 	return
+}
+
+func (c *client) StopWallet() error {
+	return c.do("stop_wallet", nil, nil)
 }
