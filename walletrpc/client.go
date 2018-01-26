@@ -48,6 +48,9 @@ type Client interface {
 	IncomingTransfers(transfertype GetTransferType) (transfers []IncTransfer, err error)
 	// Return the spend or view private key (or mnemonic seed).
 	QueryKey(keytype QueryKeyType) (key string, err error)
+	// Make an integrated address from the wallet address and a payment id.
+	// payment_id - string; hex encoded; can be empty, in which case a random payment id is generated
+	MakeIntegratedAddress(paymentid string) (integratedaddr string, err error)
 }
 
 // New returns a new monero-wallet-rpc client.
@@ -235,8 +238,6 @@ func (c *client) GetTransferByTxID(txid string) (transfer *Transfer, err error) 
 	return
 }
 
-// incoming_transfers
-
 func (c *client) IncomingTransfers(transfertype GetTransferType) (transfers []IncTransfer, err error) {
 	jin := struct {
 		TransferType GetTransferType `json:"transfer_type"`
@@ -268,5 +269,22 @@ func (c *client) QueryKey(keytype QueryKeyType) (key string, err error) {
 		return
 	}
 	key = jd.Key
+	return
+}
+
+func (c *client) MakeIntegratedAddress(paymentid string) (integratedaddr string, err error) {
+	jin := struct {
+		PaymentID string `json:"payment_id"`
+	}{
+		paymentid,
+	}
+	jd := struct {
+		Address string `json:"integrated_address"`
+	}{}
+	err = c.do("make_integrated_address", &jin, &jd)
+	if err != nil {
+		return
+	}
+	integratedaddr = jd.Address
 	return
 }
