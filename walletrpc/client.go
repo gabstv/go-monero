@@ -46,6 +46,8 @@ type Client interface {
 	GetTransferByTxID(txid string) (transfer *Transfer, err error)
 	// Return a list of incoming transfers to the wallet.
 	IncomingTransfers(transfertype GetTransferType) (transfers []IncTransfer, err error)
+	// Return the spend or view private key (or mnemonic seed).
+	QueryKey(keytype QueryKeyType) (key string, err error)
 }
 
 // New returns a new monero-wallet-rpc client.
@@ -249,5 +251,22 @@ func (c *client) IncomingTransfers(transfertype GetTransferType) (transfers []In
 		return
 	}
 	transfers = jd.Transfers
+	return
+}
+
+func (c *client) QueryKey(keytype QueryKeyType) (key string, err error) {
+	jin := struct {
+		KeyType QueryKeyType `json:"key_type"`
+	}{
+		keytype,
+	}
+	jd := struct {
+		Key string `json:"key"`
+	}{}
+	err = c.do("query_key", &jin, &jd)
+	if err != nil {
+		return
+	}
+	key = jd.Key
 	return
 }

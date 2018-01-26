@@ -82,6 +82,18 @@ const (
 	TransferUnavailable GetTransferType = "unavailable"
 )
 
+// QueryKeyType is the parameter to send with client.QueryKey()
+type QueryKeyType string
+
+const (
+	// QueryKeyMnemonic is the mnemonic seed
+	QueryKeyMnemonic QueryKeyType = "mnemonic"
+	// QueryKeyView is the private view key
+	QueryKeyView QueryKeyType = "view_key"
+	// QueryKeySpend is the private spend key
+	QueryKeySpend QueryKeyType = "spend_key" //TODO: test
+)
+
 // XMRToDecimal converts a raw atomic XMR balance to a more
 // human readable format.
 func XMRToDecimal(xmr uint64) string {
