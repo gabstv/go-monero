@@ -10,23 +10,36 @@ import (
 type H map[string]interface{}
 
 // ErrorCode is a monero-wallet-rpc error code.
-// I found them on https://github.com/monero-project/monero/blob/release-v0.11.0.0/src/wallet/wallet_rpc_server_error_codes.h
+// Copied from https://github.com/monero-project/monero/blob/release-v0.11.0.0/src/wallet/wallet_rpc_server_error_codes.h
 type ErrorCode int
 
 const (
-	E_UNKNOWN_ERROR          ErrorCode = -1
-	E_WRONG_ADDRESS          ErrorCode = -2
-	E_DAEMON_IS_BUSY         ErrorCode = -3
-	E_GENERIC_TRANSFER_ERROR ErrorCode = -4
-	E_WRONG_PAYMENT_ID       ErrorCode = -5
-	E_TRANSFER_TYPE          ErrorCode = -6
-	E_DENIED                 ErrorCode = -7
-	E_WRONG_TXID             ErrorCode = -8
-	E_WRONG_SIGNATURE        ErrorCode = -9
-	E_WRONG_KEY_IMAGE        ErrorCode = -10
-	E_WRONG_URI              ErrorCode = -11
-	E_WRONG_INDEX            ErrorCode = -12
-	E_NOT_OPEN               ErrorCode = -13
+	// ErrUnknown - E_UNKNOWN_ERROR
+	ErrUnknown ErrorCode = -1
+	// ErrWrongAddress - E_WRONG_ADDRESS
+	ErrWrongAddress ErrorCode = -2
+	// ErrDaemonIsBusy - E_DAEMON_IS_BUSY
+	ErrDaemonIsBusy ErrorCode = -3
+	// ErrGenericTransferError - E_GENERIC_TRANSFER_ERROR
+	ErrGenericTransferError ErrorCode = -4
+	// ErrWrongPaymentID - E_WRONG_PAYMENT_ID
+	ErrWrongPaymentID ErrorCode = -5
+	// ErrTransferType - E_TRANSFER_TYPE
+	ErrTransferType ErrorCode = -6
+	// ErrDenied - E_DENIED
+	ErrDenied ErrorCode = -7
+	// ErrWrongTxID - E_WRONG_TXID
+	ErrWrongTxID ErrorCode = -8
+	// ErrWrongSignature - E_WRONG_SIGNATURE
+	ErrWrongSignature ErrorCode = -9
+	// ErrWrongKeyImage - E_WRONG_KEY_IMAGE
+	ErrWrongKeyImage ErrorCode = -10
+	// ErrWrongURI - E_WRONG_URI
+	ErrWrongURI ErrorCode = -11
+	// ErrWrongIndex - E_WRONG_INDEX
+	ErrWrongIndex ErrorCode = -12
+	// ErrNotOpen - E_NOT_OPEN
+	ErrNotOpen ErrorCode = -13
 )
 
 // WalletError is the error structured returned by the monero-wallet-rpc
