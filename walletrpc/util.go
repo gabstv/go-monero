@@ -3,6 +3,7 @@ package walletrpc
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"fmt"
 )
 
 // NewPaymentID64 generates a 64 bit payment ID (hex encoded).
@@ -23,4 +24,12 @@ func NewPaymentID256() string {
 	buf := make([]byte, 32)
 	rand.Read(buf)
 	return hex.EncodeToString(buf)
+}
+
+// XMRToDecimal converts a raw atomic XMR balance to a more
+// human readable format.
+func XMRToDecimal(xmr uint64) string {
+	str0 := fmt.Sprintf("%013d", xmr)
+	l := len(str0)
+	return str0[:l-12] + "." + str0[l-12:]
 }

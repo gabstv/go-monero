@@ -93,11 +93,3 @@ const (
 	// QueryKeySpend is the private spend key
 	QueryKeySpend QueryKeyType = "spend_key" //TODO: test
 )
-
-// XMRToDecimal converts a raw atomic XMR balance to a more
-// human readable format.
-func XMRToDecimal(xmr uint64) string {
-	str0 := fmt.Sprintf("%013d", xmr)
-	l := len(str0)
-	return str0[:l-12] + "." + str0[l-12:]
-}
