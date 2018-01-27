@@ -69,6 +69,41 @@ type Client interface {
 	Sign(data string) (signature string, err error)
 	// Verify a signature on a string.
 	Verify(data, address, signature string) (good bool, err error)
+	// Export a signed set of key images.
+	ExportKeyImages() (signedkeyimages []SignedKeyImage, err error)
+	// Import signed key images list and verify their spent status.
+	ImportKeyImages(signedkeyimages []SignedKeyImage) (resp *ImportKeyImageResponse, err error)
+	// Retrieves entries from the address book.
+	// indexes - array of unsigned int; indices of the requested address book entries
+	GetAddressBook(indexes []uint64) (entries []AddressBookEntry, err error)
+	// Add an entry to the address book.
+	AddAddressBook(entry AddressBookEntry) (index uint64, err error)
+	// Delete an entry from the address book.
+	DeleteAddressBook(index uint64) error
+	// Rescan the blockchain for spent outputs.
+	RescanSpent() error
+	// Start mining in the Monero daemon.
+	// Inputs:
+	//
+	//	threads_count - unsigned int; Number of threads created for mining
+	//	do_background_mining - boolean;
+	//	ignore_battery - boolean;
+	StartMining(threads uint, background, ignorebattery bool) error
+	// Stop mining in the Monero daemon.
+	StopMining() error
+	// Get a list of available languages for your wallet's seed.
+	GetLanguages() (languages []string, err error)
+	// Create a new wallet. You need to have set the argument "–wallet-dir" when
+	// launching monero-wallet-rpc to make this work.
+	// Inputs:
+	//
+	//   filename - string;
+	//    password - string;
+	//    language - string; Language for your wallets' seed.
+	CreateWallet(filename, password, language string) error
+	// Open a wallet. You need to have set the argument "–wallet-dir" when
+	// launching monero-wallet-rpc to make this work.
+	OpenWallet(filename, password string) error
 }
 
 // New returns a new monero-wallet-rpc client.
@@ -424,4 +459,123 @@ func (c *client) Verify(data, address, signature string) (good bool, err error) 
 	}
 	good = jd.Good
 	return
+}
+
+func (c *client) ExportKeyImages() (signedkeyimages []SignedKeyImage, err error) {
+	jd := struct {
+		SignedKeyImages []SignedKeyImage `json:"signed_key_images"`
+	}{}
+	err = c.do("export_key_images", nil, &jd)
+	signedkeyimages = jd.SignedKeyImages
+	return
+}
+
+func (c *client) ImportKeyImages(signedkeyimages []SignedKeyImage) (resp *ImportKeyImageResponse, err error) {
+	jin := struct {
+		SignedKeyImages []SignedKeyImage `json:"signed_key_images"`
+	}{
+		signedkeyimages,
+	}
+	resp = &ImportKeyImageResponse{}
+	err = c.do("import_key_images", &jin, resp)
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
+func (c *client) GetAddressBook(indexes []uint64) (entries []AddressBookEntry, err error) {
+	jin := struct {
+		Indexes []uint64 `json:"entries"`
+	}{
+		indexes,
+	}
+	jd := struct {
+		Entries []AddressBookEntry `json:"entries"`
+	}{}
+	err = c.do("get_address_book", &jin, &jd)
+	if err != nil {
+		return nil, err
+	}
+	entries = jd.Entries
+	return
+}
+
+func (c *client) AddAddressBook(entry AddressBookEntry) (index uint64, err error) {
+	entry.Index = 0
+	jd := struct {
+		Index uint64 `json:"index"`
+	}{}
+	err = c.do("add_address_book", &entry, &jd)
+	if err != nil {
+		return 0, err
+	}
+	index = jd.Index
+	return
+}
+
+func (c *client) DeleteAddressBook(index uint64) error {
+	jin := struct {
+		Index uint64 `json:"index"`
+	}{
+		index,
+	}
+	return c.do("delete_address_book", &jin, nil)
+}
+
+func (c *client) RescanSpent() error {
+	return c.do("rescan_spent", nil, nil)
+}
+
+func (c *client) StartMining(threads uint, background, ignorebattery bool) error {
+	jin := struct {
+		Threads       uint `json:"threads_count"`
+		Background    bool `json:"do_background_mining"`
+		IgnoreBattery bool `json:"ignore_battery"`
+	}{
+		threads,
+		background,
+		ignorebattery,
+	}
+	return c.do("start_mining", &jin, nil)
+}
+
+func (c *client) StopMining() error {
+	return c.do("stop_mining", nil, nil)
+}
+
+func (c *client) GetLanguages() (languages []string, err error) {
+	jd := struct {
+		Languages []string `json:"languages"`
+	}{}
+	err = c.do("get_languages", nil, &jd)
+	if err != nil {
+		return nil, err
+	}
+	languages = jd.Languages
+	return
+}
+
+func (c *client) CreateWallet(filename, password, language string) error {
+	jin := struct {
+		Filename string `json:"filename"`
+		Password string `json:"password"`
+		Language string `json:"language"`
+	}{
+		filename,
+		password,
+		language,
+	}
+	return c.do("create_wallet", &jin, nil)
+}
+
+func (c *client) OpenWallet(filename, password string) error {
+	jin := struct {
+		Filename string `json:"filename"`
+		Password string `json:"password"`
+	}{
+		filename,
+		password,
+	}
+	return c.do("open_wallet", &jin, nil)
 }

@@ -157,3 +157,26 @@ type URIDef struct {
 	// tx_description (optional) - string describing the reason for the tx
 	TxDescription string `json:"tx_description,omitempty"`
 }
+
+// SignedKeyImage - The key image is an alternate public key computed on a second base point,
+// Hp(P), instead of G. It is required in traceable ring signature construction to ensure
+// multiple signatures with the same real key are linked.
+type SignedKeyImage struct {
+	KeyImage  string `json:"key_image"`
+	Signature string `json:"signature"`
+}
+
+// ImportKeyImageResponse is the result of ImportKeyImages()
+type ImportKeyImageResponse struct {
+	Height  uint64 `json:"height"`
+	Spent   uint64 `json:"spent"`
+	Unspent uint64 `json:"unspent"`
+}
+
+// AddressBookEntry Address
+type AddressBookEntry struct {
+	Address     string `json:"address"`
+	Description string `json:"description,omitempty"`
+	Index       uint64 `json:"index,omitempty"`
+	PaymentID   string `json:"payment_id,omitempty"`
+}
