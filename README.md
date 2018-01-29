@@ -35,6 +35,7 @@ import (
 	"os"
 
 	"github.com/gabstv/go-monero/walletrpc"
+	"github.com/gabstv/go-monero/walletrpc/unit"
 )
 
 func main() {
@@ -69,7 +70,7 @@ func main() {
 		Destinations: []walletrpc.Destination{
 			{
 				Address: "45eoXYNHC4LcL2Hh42T9FMPTmZHyDEwDbgfBEuNj3RZUek8A4og4KiCfVL6ZmvHBfCALnggWtHH7QHF8426yRayLQq7MLf5",
-				Amount:  10000000000, // 0.01 XMR
+				Amount:  10*unit.Millinero, // 0.01 XMR
 			},
 		},
 		Priority: walletrpc.PriorityUnimportant,
