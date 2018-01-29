@@ -7,7 +7,7 @@ This package is a hub of monero related tools for Go. At this time, only the Wal
 [![GoDoc](https://godoc.org/github.com/gabstv/go-monero/walletrpc?status.svg)](https://godoc.org/github.com/gabstv/go-monero/walletrpc)
 
 The ```go-monero/walletrpc``` package is a RPC client with all the methods of the v0.11.0.0 release.
-It does not support [digest authentication](https://en.wikipedia.org/wiki/Digest_access_authentication#Disadvantages). If there is a need to split the RPC client and server into separate instances, you could put a proxy on the instance that contains the RPC server and check the authenticity of the requests using https + X-API-KEY headers between the proxy and this RPC client (there is an example about this implementation below)
+It does support digest authentication, [however I don't recommend using it alone (without https).](https://en.wikipedia.org/wiki/Digest_access_authentication#Disadvantages) If there is a need to split the RPC client and server into separate instances, you could put a proxy on the instance that contains the RPC server and check the authenticity of the requests using https + X-API-KEY headers between the proxy and this RPC client (there is an example about this implementation below)
 
 ### Installation
 
@@ -86,6 +86,42 @@ func main() {
 		os.Exit(1)
 	}
 	fmt.Println("Transfer success! Fee:", walletrpc.XMRToDecimal(res.Fee), "Hash:", res.TxHash)
+}
+```
+
+### Using Digest Authentication
+
+```sh
+monero-wallet-rpc --testnet --rpc-bind-ip 127.0.0.1 --rpc-bind-port 29567 --rpc-login john:doe --wallet-file ~/testnet/wallet_03.bin
+```
+
+```Go
+package main
+
+import (
+	"fmt"
+
+	"github.com/gabstv/go-monero/walletrpc"
+	"github.com/gabstv/httpdigest"
+)
+
+func main() {
+	// username: john
+	// password: doe
+	t := httpdigest.New("john", "doe")
+
+	client := walletrpc.New(walletrpc.Config{
+		Address:   "http://127.0.0.1:29567/json_rpc",
+		Transport: t,
+	})
+
+	balance, unlocked, err := client.Getbalance()
+
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("balance", walletrpc.XMRToDecimal(balance))
+	fmt.Println("unlocked balance", walletrpc.XMRToDecimal(unlocked))
 }
 ```
 
