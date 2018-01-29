@@ -11,14 +11,14 @@ import (
 // Client is a monero-wallet-rpc client.
 type Client interface {
 	// Return the wallet's balance.
-	Getbalance() (balance, unlockedBalance uint64, err error)
+	GetBalance() (balance, unlockedBalance uint64, err error)
 	// Return the wallet's address.
 	// address - string; The 95-character hex address string of the monero-wallet-rpc in session.
-	Getaddress() (address string, err error)
-	// Getheight - Returns the wallet's current block height.
+	GetAddress() (address string, err error)
+	// GetHeight - Returns the wallet's current block height.
 	// height - unsigned int; The current monero-wallet-rpc's blockchain height.
 	// If the wallet has been offline for a long time, it may need to catch up with the daemon.
-	Getheight() (height uint, err error)
+	GetHeight() (height uint, err error)
 	// Transfer - Send monero to a number of recipients.
 	Transfer(req TransferRequest) (resp *TransferResponse, err error)
 	// Same as transfer, but can split into more than one tx if necessary.
@@ -161,7 +161,7 @@ func (c *client) do(method string, in, out interface{}) error {
 	return json2.DecodeClientResponse(resp.Body, out)
 }
 
-func (c *client) Getbalance() (balance, unlockedBalance uint64, err error) {
+func (c *client) GetBalance() (balance, unlockedBalance uint64, err error) {
 	jd := struct {
 		Balance         uint64 `json:"balance"`
 		UnlockedBalance uint64 `json:"unlocked_balance"`
@@ -170,7 +170,7 @@ func (c *client) Getbalance() (balance, unlockedBalance uint64, err error) {
 	return jd.Balance, jd.UnlockedBalance, err
 }
 
-func (c *client) Getaddress() (address string, err error) {
+func (c *client) GetAddress() (address string, err error) {
 	jd := struct {
 		Address string `json:"address"`
 	}{}
@@ -181,7 +181,7 @@ func (c *client) Getaddress() (address string, err error) {
 	return jd.Address, nil
 }
 
-func (c *client) Getheight() (height uint, err error) {
+func (c *client) GetHeight() (height uint, err error) {
 	jd := struct {
 		Height uint `json:"height"`
 	}{}

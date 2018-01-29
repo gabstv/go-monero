@@ -44,7 +44,7 @@ func main() {
 	})
 
 	// check wallet balance
-	balance, unlocked, err := client.Getbalance()
+	balance, unlocked, err := client.GetBalance()
 
 	// there are two types of error that can happen:
 	//   connection errors
@@ -115,7 +115,7 @@ func main() {
 		Transport: t,
 	})
 
-	balance, unlocked, err := client.Getbalance()
+	balance, unlocked, err := client.GetBalance()
 
 	if err != nil {
 		panic(err)
@@ -188,7 +188,7 @@ func main() {
 	})
 
 	// check wallet balance
-	balance, unlocked, err := client.Getbalance()
+	balance, unlocked, err := client.GetBalance()
 
 	// there are two types of error that can happen:
 	//   connection errors
