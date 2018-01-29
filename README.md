@@ -7,7 +7,7 @@ This package is a hub of monero related tools for Go. At this time, only the Wal
 [![GoDoc](https://godoc.org/github.com/gabstv/go-monero/walletrpc?status.svg)](https://godoc.org/github.com/gabstv/go-monero/walletrpc)
 
 The ```go-monero/walletrpc``` package is a RPC client with all the methods of the v0.11.0.0 release.
-It does not support digest authentication. If there is a need to split the RPC client and server into separate instances, you could put a proxy on the instance that contains the RPC server and check the authenticity of the requests using https + X-API-KEY headers between the proxy and this RPC client (there is an example about this implementation below)
+It does not support [digest authentication](https://en.wikipedia.org/wiki/Digest_access_authentication#Disadvantages). If there is a need to split the RPC client and server into separate instances, you could put a proxy on the instance that contains the RPC server and check the authenticity of the requests using https + X-API-KEY headers between the proxy and this RPC client (there is an example about this implementation below)
 
 ### Installation
 
