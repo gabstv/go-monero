@@ -18,7 +18,7 @@ type Client interface {
 	// GetHeight - Returns the wallet's current block height.
 	// height - unsigned int; The current monero-wallet-rpc's blockchain height.
 	// If the wallet has been offline for a long time, it may need to catch up with the daemon.
-	GetHeight() (height uint, err error)
+	GetHeight() (height uint64, err error)
 	// Transfer - Send monero to a number of recipients.
 	Transfer(req TransferRequest) (resp *TransferResponse, err error)
 	// Same as transfer, but can split into more than one tx if necessary.
@@ -181,9 +181,9 @@ func (c *client) GetAddress() (address string, err error) {
 	return jd.Address, nil
 }
 
-func (c *client) GetHeight() (height uint, err error) {
+func (c *client) GetHeight() (height uint64, err error) {
 	jd := struct {
-		Height uint `json:"height"`
+		Height uint64 `json:"height"`
 	}{}
 	err = c.do("getheight", nil, &jd)
 	if err != nil {
