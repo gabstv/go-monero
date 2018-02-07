@@ -1,6 +1,7 @@
 # go-monero
 
-This package is a hub of monero related tools for Go. At this time, only the Wallet RPC Client is available.
+This package is a hub of monero related tools for Go. At this time, only the Wallet RPC Client is available.  
+[![Go Report Card](https://goreportcard.com/badge/github.com/gabstv/go-monero)](https://goreportcard.com/report/github.com/gabstv/go-monero)
 
 ## Wallet RPC Client
 
