@@ -212,12 +212,3 @@ func main() {
     fmt.Println("Unlocked balance:", walletrpc.XMRToDecimal(unlocked))
 }
 ```
-
-# Contributing
-
-* You can contribute with pull requests.
-* If could donate some XMR to the address below if you're feeling generous:
-
-```
-45eoXYNHC4LcL2Hh42T9FMPTmZHyDEwDbgfBEuNj3RZUek8A4og4KiCfVL6ZmvHBfCALnggWtHH7QHF8426yRayLQq7MLf5
-```
